@@ -5,8 +5,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.security.KeyPair;
 import java.security.PublicKey;
-import java.util.Scanner;
-
 import javax.swing.JFrame;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
@@ -22,7 +20,6 @@ public class ILPServer extends JFrame{
 	private Socket client;
 	private ObjectOutputStream output;
 	private ObjectInputStream input;
-	private Scanner sc;
 	private KeyPair keyPair;
 	private PublicKey clientDSAPublicKey;
 	private JTextArea textArea;
@@ -32,7 +29,6 @@ public class ILPServer extends JFrame{
 	  	configUI();
 		try {
 			serverSocket = new ServerSocket(portNo, 1);
-			sc = new Scanner(System.in);
 			keyPair = RSA.buildKeyPair();
 		} catch (IOException e) {
 			System.out.println("Server Initialization error: " + e.getLocalizedMessage());
