@@ -27,6 +27,21 @@ public class ILPServer extends JFrame{
 	private PublicKey clientDSAPublicKey;
 	private JTextArea textArea;
 	public ILPServer(int portNo) {
+		
+	  		
+	  	configUI();
+		try {
+			serverSocket = new ServerSocket(portNo, 1);
+			sc = new Scanner(System.in);
+			keyPair = RSA.buildKeyPair();
+		} catch (IOException e) {
+			System.out.println("Server Initialization error: " + e.getLocalizedMessage());
+		}
+
+	}
+	
+	private void configUI() {
+		
 		super.setTitle("Server");
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
      	getContentPane().setLayout(null);
@@ -48,16 +63,6 @@ public class ILPServer extends JFrame{
 
 	  	setSize(width,height);  
 		setVisible(true); 
-	  		
-	  	
-		try {
-			serverSocket = new ServerSocket(portNo, 1);
-			sc = new Scanner(System.in);
-			keyPair = RSA.buildKeyPair();
-		} catch (IOException e) {
-			System.out.println("Server Initialization error: " + e.getLocalizedMessage());
-		}
-
 	}
 
 	public void startRunning() {
@@ -76,14 +81,7 @@ public class ILPServer extends JFrame{
 		} 
 	}
 	
-	public void sharePublicKeys() {
-		try {
-			output.writeObject(keyPair.getPublic());
-			clientDSAPublicKey = (PublicKey) input.readObject();
-		}catch(Exception e) {
-			e.printStackTrace();
-		}
-	}
+
 	private void setupStreams() {
 
 		try {
@@ -95,6 +93,15 @@ public class ILPServer extends JFrame{
 
 	}
 
+	private void sharePublicKeys() {
+		try {
+			output.writeObject(keyPair.getPublic());
+			clientDSAPublicKey = (PublicKey) input.readObject();
+		}catch(Exception e) {
+			e.printStackTrace();
+		}
+	}
+	
 	private void startListening() {
 
 		do {
@@ -122,7 +129,7 @@ public class ILPServer extends JFrame{
 
 	}
 
-	void showMessage(String message) {
+	private void showMessage(String message) {
 		textArea.append("Client: " +message+"\n");
 	}
 
