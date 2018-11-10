@@ -20,21 +20,21 @@ import javax.crypto.Cipher;
 public class ILPClient {
 	private Socket clientEndPoint;
 	private Scanner sc;
-	private DataOutputStream output;
-	private DataInputStream input;
+	private ObjectOutputStream output;
+	private ObjectInputStream input;
 	private PublicKey sharedRSAPublicKey;
 	KeyPair dsaKeypair;
-	
+
 	public ILPClient() {
 		// TODO Auto-generated constructor stub
 		sc = new Scanner(System.in);
-		
+
 		try {
 			KeyPairGenerator pairgen = KeyPairGenerator.getInstance("DSA");
 			SecureRandom random = new SecureRandom();
 			pairgen.initialize(512, random);
 			dsaKeypair = pairgen.generateKeyPair();
-		}catch(NoSuchAlgorithmException e) {
+		} catch (NoSuchAlgorithmException e) {
 			e.printStackTrace();
 		}
 	}
@@ -52,10 +52,10 @@ public class ILPClient {
 		try {
 
 			clientEndPoint = new Socket("127.0.0.1", 6666);
-			
+
 			ObjectInputStream ois = new ObjectInputStream(clientEndPoint.getInputStream());
 			sharedRSAPublicKey = (PublicKey) ois.readObject();
-			
+
 			ObjectOutputStream oos = new ObjectOutputStream(clientEndPoint.getOutputStream());
 			oos.writeObject(dsaKeypair.getPublic());
 
@@ -69,8 +69,8 @@ public class ILPClient {
 
 	private void setupStreams() {
 		try {
-			output = new DataOutputStream(clientEndPoint.getOutputStream());
-			input = new DataInputStream(clientEndPoint.getInputStream());
+			output = new ObjectOutputStream(clientEndPoint.getOutputStream());
+			input = new ObjectInputStream(clientEndPoint.getInputStream());
 		} catch (IOException e) {
 			System.out.println("Stream setup error: " + e.getLocalizedMessage());
 		}
@@ -86,25 +86,24 @@ public class ILPClient {
 				do {
 					System.out.print("Client: ");
 					message = sc.nextLine();
-					
+
 					try {
 						byte[] messageBye = message.getBytes();
-						
+
 						Signature sign = Signature.getInstance("DSA");
 						sign.initSign(dsaKeypair.getPrivate());
-						
+
 						sign.update(messageBye);
-				        
+
 						byte[] signature = sign.sign();
-				         
-						
+
 						byte[] encrypted = encrypt(sharedRSAPublicKey, messageBye);
-						output.writeInt(encrypted.length);
-						output.write(encrypted);
-						output.writeInt(signature.length);
-						output.write(signature);
+						MessageBody messageBody = new MessageBody();
+						messageBody.message = encrypted;
+						messageBody.signature = signature;
+						output.writeObject(messageBody);
 						
-					}catch(Exception e) {
+					} catch (Exception e) {
 						e.printStackTrace();
 					}
 				} while (!message.equals("end"));

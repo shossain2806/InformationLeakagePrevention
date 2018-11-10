@@ -22,8 +22,8 @@ public class ILPServer {
 
 	private ServerSocket serverSocket;
 	private Socket client;
-	private DataOutputStream output;
-	private DataInputStream input;
+	private ObjectOutputStream output;
+	private ObjectInputStream input;
 	private Scanner sc;
 	private KeyPair keyPair;
 	private PublicKey clientDSAPublicKey;
@@ -68,8 +68,8 @@ public class ILPServer {
 	private void setupStreams() {
 
 		try {
-			output = new DataOutputStream(client.getOutputStream());
-			input = new DataInputStream(client.getInputStream());
+			output = new ObjectOutputStream(client.getOutputStream());
+			input = new ObjectInputStream(client.getInputStream());
 		} catch (IOException e) {
 			System.out.println("Stream setup error: " + e.getLocalizedMessage());
 		}
@@ -81,22 +81,16 @@ public class ILPServer {
 		do {
 			try {
 
-				int len = input.readInt();
-				byte[] encrypted = new byte[len];
-
-				input.readFully(encrypted, 0, len);
-
-				byte[] decrypted = decrypt(keyPair.getPrivate(), encrypted);
-
-				int lenSig = input.readInt();
-				byte[] signature = new byte[lenSig];
-
-				input.readFully(signature, 0, lenSig);
+				MessageBody messageBody = (MessageBody) input.readObject();
+		
+				byte[] decrypted = decrypt(keyPair.getPrivate(), messageBody.message);
+				byte[] signature = messageBody.signature;
 
 				Signature verifyalg = Signature.getInstance("DSA");
 				verifyalg.initVerify(clientDSAPublicKey);
-
+				
 				verifyalg.update(decrypted);
+				
 				if (verifyalg.verify(signature)) {
 					String message = new String(decrypted);
 					showMessage(message);
