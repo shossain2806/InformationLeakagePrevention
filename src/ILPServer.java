@@ -7,9 +7,17 @@ import java.security.KeyPair;
 import java.security.PublicKey;
 import java.util.Scanner;
 
+import javax.swing.JFrame;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
 
-public class ILPServer {
 
+public class ILPServer extends JFrame{
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	private ServerSocket serverSocket;
 	private Socket client;
 	private ObjectOutputStream output;
@@ -17,9 +25,31 @@ public class ILPServer {
 	private Scanner sc;
 	private KeyPair keyPair;
 	private PublicKey clientDSAPublicKey;
-
+	private JTextArea textArea;
 	public ILPServer(int portNo) {
+		super.setTitle("Server");
+		setDefaultCloseOperation(EXIT_ON_CLOSE);
+     	getContentPane().setLayout(null);
+     	int width = 400;
+		int height = 500;
+		//
+		textArea = new JTextArea();
+		int originXTextArea = 10;
+		int originYTextArea = 10;
+		int widhtTextArea = width - 20;
+		int heightTextArea = height - 20;
+		textArea.setEditable(false);
+	    JScrollPane scroll = new JScrollPane(textArea);
+	    scroll.setBounds(originXTextArea, originYTextArea, widhtTextArea, heightTextArea);
+	    textArea.setLineWrap(true);
+	    textArea.setWrapStyleWord(true);
+	    getContentPane().add(scroll);
+	    setLocationRelativeTo ( null );
 
+	  	setSize(width,height);  
+		setVisible(true); 
+	  		
+	  	
 		try {
 			serverSocket = new ServerSocket(portNo, 1);
 			sc = new Scanner(System.in);
@@ -93,7 +123,7 @@ public class ILPServer {
 	}
 
 	void showMessage(String message) {
-		System.out.println("Client: " + message);
+		textArea.append("Client: " +message+"\n");
 	}
 
 	
