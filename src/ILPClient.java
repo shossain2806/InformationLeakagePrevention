@@ -1,21 +1,18 @@
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
+
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
+
 import java.net.Socket;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.NoSuchAlgorithmException;
-import java.security.PrivateKey;
+
 import java.security.PublicKey;
 import java.security.SecureRandom;
 import java.security.Signature;
 import java.util.Scanner;
 
-import javax.crypto.Cipher;
 
 public class ILPClient {
 	private Socket clientEndPoint;
@@ -28,15 +25,8 @@ public class ILPClient {
 	public ILPClient() {
 		// TODO Auto-generated constructor stub
 		sc = new Scanner(System.in);
+		dsaKeypair = DSA.buildKeyPair();
 
-		try {
-			KeyPairGenerator pairgen = KeyPairGenerator.getInstance("DSA");
-			SecureRandom random = new SecureRandom();
-			pairgen.initialize(512, random);
-			dsaKeypair = pairgen.generateKeyPair();
-		} catch (NoSuchAlgorithmException e) {
-			e.printStackTrace();
-		}
 	}
 
 	public void startRunning() {
@@ -88,19 +78,15 @@ public class ILPClient {
 					message = sc.nextLine();
 
 					try {
-						byte[] messageBye = message.getBytes();
+						byte[] messageByte = message.getBytes();
 
-						Signature sign = Signature.getInstance("DSA");
-						sign.initSign(dsaKeypair.getPrivate());
-
-						sign.update(messageBye);
-
-						byte[] signature = sign.sign();
-
-						byte[] encrypted = encrypt(sharedRSAPublicKey, messageBye);
+						byte[] signature = DSA.signatureByte(messageByte, dsaKeypair.getPrivate());
+						byte[] encrypted = RSA.encrypt(sharedRSAPublicKey, messageByte);
+						
 						MessageBody messageBody = new MessageBody();
 						messageBody.message = encrypted;
 						messageBody.signature = signature;
+						
 						output.writeObject(messageBody);
 						
 					} catch (Exception e) {
@@ -112,18 +98,7 @@ public class ILPClient {
 		new Thread(r).start();
 	}
 
-	public static byte[] encrypt(PublicKey publicKey, byte[] message) {
-		try {
-			Cipher cipher = Cipher.getInstance("RSA");
-			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
 
-			return cipher.doFinal(message);
-		} catch (Exception e) {
-			e.printStackTrace();
-			return new byte[0];
-		}
-
-	}
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
