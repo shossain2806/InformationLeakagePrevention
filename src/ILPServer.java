@@ -36,25 +36,24 @@ public class ILPServer {
 		try {
 			System.out.println("Waiting for a connection on port: " + serverSocket.getLocalPort());
 			client = serverSocket.accept();
-
-			ObjectOutputStream objOutput = new ObjectOutputStream(client.getOutputStream());
-			objOutput.writeObject(keyPair.getPublic());
-
-			ObjectInputStream ois = new ObjectInputStream(client.getInputStream());
-			clientDSAPublicKey = (PublicKey) ois.readObject();
-
 			System.out.println("Client connected: " + client.getRemoteSocketAddress());
-
 			setupStreams();
+			sharePublicKeys();
 			startListening();
 
 		} catch (IOException e) {
 			System.out.println("Server connection error: " + e.getLocalizedMessage());
-		} catch (ClassNotFoundException e) {
+		} 
+	}
+	
+	public void sharePublicKeys() {
+		try {
+			output.writeObject(keyPair.getPublic());
+			clientDSAPublicKey = (PublicKey) input.readObject();
+		}catch(Exception e) {
 			e.printStackTrace();
 		}
 	}
-
 	private void setupStreams() {
 
 		try {
@@ -98,9 +97,6 @@ public class ILPServer {
 	}
 
 	
-
-	
-
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
 		ILPServer server = new ILPServer(6666);

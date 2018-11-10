@@ -1,16 +1,10 @@
 import java.io.IOException;
-
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-
 import java.net.Socket;
 import java.security.KeyPair;
-import java.security.KeyPairGenerator;
-import java.security.NoSuchAlgorithmException;
-
 import java.security.PublicKey;
-import java.security.SecureRandom;
-import java.security.Signature;
+
 import java.util.Scanner;
 
 
@@ -34,6 +28,7 @@ public class ILPClient {
 		// waiting for a user
 		connectToServer();
 		setupStreams();
+		sharePublicKeys();
 		startMessaging();
 
 	}
@@ -43,18 +38,10 @@ public class ILPClient {
 
 			clientEndPoint = new Socket("127.0.0.1", 6666);
 
-			ObjectInputStream ois = new ObjectInputStream(clientEndPoint.getInputStream());
-			sharedRSAPublicKey = (PublicKey) ois.readObject();
-
-			ObjectOutputStream oos = new ObjectOutputStream(clientEndPoint.getOutputStream());
-			oos.writeObject(dsaKeypair.getPublic());
-
 			System.out.println("Client connected to server: " + clientEndPoint.getRemoteSocketAddress());
 		} catch (IOException e) {
 			System.out.println("Client connection error : " + e.getLocalizedMessage());
-		} catch (ClassNotFoundException e) {
-			e.printStackTrace();
-		}
+		} 
 	}
 
 	private void setupStreams() {
@@ -63,6 +50,16 @@ public class ILPClient {
 			input = new ObjectInputStream(clientEndPoint.getInputStream());
 		} catch (IOException e) {
 			System.out.println("Stream setup error: " + e.getLocalizedMessage());
+		}
+	}
+	
+	public void sharePublicKeys() {
+		try {
+			output.writeObject(dsaKeypair.getPublic());
+			sharedRSAPublicKey = (PublicKey) input.readObject();
+			
+		}catch(Exception e) {
+			e.printStackTrace();
 		}
 	}
 
