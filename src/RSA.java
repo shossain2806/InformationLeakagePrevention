@@ -23,10 +23,12 @@ public class RSA {
 	
 	public static byte[] encrypt(PublicKey publicKey, byte[] message) {
 		try {
+			System.out.println("before encryption,plain text:"+ new String(message));
 			Cipher cipher = Cipher.getInstance("RSA");
 			cipher.init(Cipher.ENCRYPT_MODE, publicKey);
-
-			return cipher.doFinal(message);
+			byte[] encryped = cipher.doFinal(message);
+			System.out.println("encrypted text:"+ new String(encryped));
+			return encryped;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new byte[0];
@@ -36,9 +38,12 @@ public class RSA {
 	
 	public static byte[] decrypt(PrivateKey privateKey, byte[] encrypted) {
 		try {
+			System.out.println("before decryption,encrypted text:"+ new String(encrypted));
 			Cipher cipher = Cipher.getInstance("RSA");
 			cipher.init(Cipher.DECRYPT_MODE, privateKey);
-			return cipher.doFinal(encrypted);
+			byte[] decrypted = cipher.doFinal(encrypted);
+			System.out.println("decrypted text:"+ new String(decrypted));
+ 			return decrypted;
 		} catch (Exception e) {
 			e.printStackTrace();
 			return new byte[0];
